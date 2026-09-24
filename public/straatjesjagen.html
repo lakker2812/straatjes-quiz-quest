@@ -882,7 +882,7 @@ function drawBase() {
     hit.on("mouseout", () => pl.setStyle({ color: "#8e9d95", weight: 2.5 }));
     baseLayer.addLayer(pl); baseLayer.addLayer(hit);
   });
-  [[[51.731998,5.50899],[51.731765,5.50899]],[[51.732029,5.509681],[51.7316,5.509681]]].forEach(l => L.polyline(l, { pane: "streets", renderer: canvasRenderer, color: "#8e9d95", weight: 2.5, opacity: .95, interactive: false }).addTo(baseLayer));
+  [[[51.73196,5.50908],[51.731857,5.50908]],[[51.732029,5.509681],[51.7316,5.509681]]].forEach(l => L.polyline(l, { pane: "streets", renderer: canvasRenderer, color: "#8e9d95", weight: 2.5, opacity: .95, interactive: false }).addTo(baseLayer));
   // Naamloze rotonde: uitsluitend visueel, nooit onderdeel van een quizvraag.
   L.circle([51.73223, 5.50931], { pane: "streets", renderer: canvasRenderer, radius: 34, color: "#8e9d95", weight: 2.5, fill: false, interactive: false }).addTo(baseLayer);
   map.fitBounds(MAP_BOUNDS, { padding: [24, 24] });
