@@ -848,6 +848,24 @@ function drawBackground() {
   bg.built.filter(visible).forEach(p => L.polygon(p, { pane: "buildings", color: "#c3c8c5", weight: .45, fillColor: "#d8dcda", fillOpacity: .8, interactive: false }).addTo(backgroundLayer));
   bg.waterlines.filter(visible).forEach(p => L.polyline(p, { pane: "waterlines", color: "#78c4dc", weight: 2, opacity: .9, interactive: false }).addTo(backgroundLayer));
 }
+const ROUND_C = L.latLng(51.73223, 5.50931), ROUND_R = 34;
+function clipRound(lines) {
+  const out = [];
+  const inside = p => map.distance(ROUND_C, p) < ROUND_R;
+  const edge = (a, b) => { let lo = 0, hi = 1; const A = L.latLng(a), B = L.latLng(b); const ai = inside(A);
+    for (let k = 0; k < 20; k++) { const m = (lo + hi) / 2; const P = [A.lat + (B.lat - A.lat) * m, A.lng + (B.lng - A.lng) * m]; if (inside(P) === ai) lo = m; else hi = m; }
+    return [A.lat + (B.lat - A.lat) * lo, A.lng + (B.lng - A.lng) * lo]; };
+  for (const line of lines) {
+    let cur = [];
+    for (let i = 0; i < line.length; i++) {
+      const p = line[i], pin = inside(p);
+      if (i > 0 && pin !== inside(line[i-1])) { const e = edge(line[i-1], p); if (pin) { cur.push(e); if (cur.length > 1) out.push(cur); cur = []; } else cur = [e]; }
+      if (!pin) cur.push(p);
+    }
+    if (cur.length > 1) out.push(cur);
+  }
+  return out.length ? out : lines;
+}
 function drawBase() {
   baseLayer.clearLayers();
   STREETS.forEach(s => {
@@ -857,13 +875,14 @@ function drawBase() {
     s.bounds = L.latLngBounds(s.lines.flat());
   });
   STREETS.forEach((s, i) => {
-    const pl = L.polyline(s.lines, { pane: "streets", renderer: canvasRenderer, color: "#8e9d95", weight: 2.5, opacity: .95, smoothFactor: 1.5 });
+    const pl = L.polyline(clipRound(s.lines), { pane: "streets", renderer: canvasRenderer, color: "#8e9d95", weight: 2.5, opacity: .95, smoothFactor: 1.5 });
     const hit = L.polyline(s.lines, { pane: "streets", renderer: canvasRenderer, color: "#000", weight: 16, opacity: 0, smoothFactor: 1.5 });
     hit.on("click", () => onMapClick(i));
     hit.on("mouseover", () => { if (state && state.mode === "normal" && !state.locked) pl.setStyle({ color: "#4f6156", weight: 4 }); });
     hit.on("mouseout", () => pl.setStyle({ color: "#8e9d95", weight: 2.5 }));
     baseLayer.addLayer(pl); baseLayer.addLayer(hit);
   });
+  [[[51.73195,5.509065],[51.7318,5.509065]],[[51.732029,5.509681],[51.7316,5.509681]]].forEach(l => L.polyline(l, { pane: "streets", renderer: canvasRenderer, color: "#8e9d95", weight: 2.5, opacity: .95, interactive: false }).addTo(baseLayer));
   // Naamloze rotonde: uitsluitend visueel, nooit onderdeel van een quizvraag.
   L.circle([51.73223, 5.50931], { pane: "streets", renderer: canvasRenderer, radius: 34, color: "#8e9d95", weight: 2.5, fill: false, interactive: false }).addTo(baseLayer);
   map.fitBounds(MAP_BOUNDS, { padding: [24, 24] });
