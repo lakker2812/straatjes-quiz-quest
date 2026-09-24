@@ -823,11 +823,34 @@ const REMOVED_STREETS = new Set([
   "Brierstraat", "Zwaardweg", "Heikampstraat", "Dooreindstraat", "Bronsweg",
   "Nieuwe Hescheweg", "Vorsselweg", "Doorneindstraat", "Tolstraat"
 ]);
+const CUTS = [
+  p => p[0] > 51.73883 && p[1] > 5.5057 && p[1] < 5.51256,
+  p => p[1] < 5.48853 && p[0] > 51.725,
+  p => p[0] < 51.71873 && p[1] < 5.51067,
+  p => p[0] < 51.7182 && p[1] > 5.51891 && p[1] < 5.52338,
+  p => p[0] < 51.71831 && p[1] > 5.5323 && p[1] < 5.53677,
+];
+function cutEdges(lines) {
+  const out = (p) => CUTS.some(c => c(p));
+  const edge = (a, b) => { let lo = 0, hi = 1; for (let k = 0; k < 24; k++) { const m = (lo + hi) / 2; out([a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m]) === out(a) ? lo = m : hi = m; } const m = out(a) ? hi : lo; return [a[0] + (b[0] - a[0]) * m, a[1] + (b[1] - a[1]) * m]; };
+  const res = [];
+  for (const line of lines) {
+    let cur = [];
+    for (let i = 0; i < line.length; i++) {
+      const p = line[i], po = out(p);
+      if (i > 0 && po !== out(line[i-1])) { const e = edge(line[i-1], p); if (po) { cur.push(e); if (cur.length > 1) res.push(cur); cur = []; } else cur = [e]; }
+      if (!po) cur.push(p);
+    }
+    if (cur.length > 1) res.push(cur);
+  }
+  return res;
+}
 function loadStreets() {
   const raw = JSON.parse(document.getElementById("heesch-data").textContent);
   STREETS = Object.entries(raw)
     .filter(([name]) => !REMOVED_STREETS.has(name))
     .map(([name, lines]) => [name, name === "Ludovicushof" ? [...lines, [[51.73388, 5.52283], [51.733822, 5.522723], [51.733772, 5.522701], [51.733639, 5.522723], [51.733581, 5.522803], [51.733506, 5.522817], [51.73339, 5.522857], [51.73329, 5.522924], [51.733091, 5.523018], [51.732958, 5.523125], [51.73285, 5.523184]]] : lines])
+    .map(([name, lines]) => [name, cutEdges(lines)])
     .map(([name, lines]) => ({ name, lines: lines.filter(line => line.some(p => p[1] <= QUIZ_EAST_LIMIT)), len: totalLen(lines) }))
     .filter(s => s.lines.length)
     .sort((a, b) => a.name.localeCompare(b.name, "nl"));
