@@ -827,6 +827,7 @@ function loadStreets() {
   const raw = JSON.parse(document.getElementById("heesch-data").textContent);
   STREETS = Object.entries(raw)
     .filter(([name]) => !REMOVED_STREETS.has(name))
+    .map(([name, lines]) => [name, name === "Ludovicushof" ? [...lines, [[51.73388, 5.52283], [51.733822, 5.522723], [51.733772, 5.522701], [51.733639, 5.522723], [51.733581, 5.522803], [51.733506, 5.522817], [51.73339, 5.522857], [51.73329, 5.522924], [51.733091, 5.523018], [51.732958, 5.523125], [51.73285, 5.523184]]] : lines])
     .map(([name, lines]) => ({ name, lines: lines.filter(line => line.some(p => p[1] <= QUIZ_EAST_LIMIT)), len: totalLen(lines) }))
     .filter(s => s.lines.length)
     .sort((a, b) => a.name.localeCompare(b.name, "nl"));
