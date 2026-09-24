@@ -17,7 +17,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <iframe
-      src="/straatjesjagen.html"
+      src="/straatjesjagen-v3.html"
       title="Straatjesjagen Heesch"
       className="fixed inset-0 h-screen w-screen border-0"
     />
