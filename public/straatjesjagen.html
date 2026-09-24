@@ -865,7 +865,7 @@ function drawBase() {
     baseLayer.addLayer(pl); baseLayer.addLayer(hit);
   });
   // Naamloze rotonde: uitsluitend visueel, nooit onderdeel van een quizvraag.
-  L.circle([51.73218, 5.50918], { pane: "streets", renderer: canvasRenderer, radius: 14, color: "#8e9d95", weight: 2.5, fill: false, interactive: false }).addTo(baseLayer);
+  L.circle([51.73223, 5.50931], { pane: "streets", renderer: canvasRenderer, radius: 34, color: "#8e9d95", weight: 2.5, fill: false, interactive: false }).addTo(baseLayer);
   map.fitBounds(MAP_BOUNDS, { padding: [24, 24] });
 }
 
