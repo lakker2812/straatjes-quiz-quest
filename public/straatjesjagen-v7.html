@@ -821,8 +821,20 @@ const REMOVED_STREETS = new Set([
   "126ste Wingweg", "Hoenderbosscheweg", "Zandbergseweg", "Langdreef",
   "Zevenbergen", "Vorssel", "Tolweg", "Oude Rijksweg", "Rijksweg",
   "Brierstraat", "Zwaardweg", "Heikampstraat", "Dooreindstraat", "Bronsweg",
-  "Nieuwe Hescheweg", "Vorsselweg", "Doorneindstraat", "Tolstraat"
+  "Nieuwe Hescheweg", "Vorsselweg", "Doorneindstraat", "Tolstraat",
+  "Leonardus van Veghelstraat"
 ]);
+const VIJFEIKEN_LINES = [
+  [[51.7296331,5.505352],[51.7304305,5.5118752],[51.7317595,5.517025],[51.7326632,5.5183983],[51.7354273,5.5312729],[51.7363309,5.5357361],[51.7373409,5.5362511],[51.7388822,5.5425167],[51.7387228,5.5465508],[51.7401047,5.5523014]],
+  [[51.7317595,5.517025],[51.7306432,5.51754],[51.7308027,5.512991],[51.7324506,5.5126476],[51.7354273,5.511446],[51.7355336,5.510416],[51.7347895,5.5099869],[51.7329822,5.5103302],[51.7311748,5.5116177],[51.7302711,5.5126476],[51.7306432,5.51754]],
+  [[51.7302711,5.5126476],[51.7292078,5.512991],[51.7289952,5.5151367],[51.7293673,5.5171967],[51.7299521,5.5177116]],
+  [[51.7317595,5.517025],[51.7306432,5.51754],[51.7289952,5.5178833],[51.7268687,5.5186558],[51.7225621,5.5214024],[51.7179893,5.523634]],
+  [[51.7225621,5.5214024],[51.723147,5.5263805]]
+];
+function connectRuiterswegOost(lines) {
+  const westToCenter = [...lines[3], ...lines[0].slice(1), ...lines[1].slice(1), ...lines[2].slice(1)];
+  return [[...westToCenter, lines[4][0], ...lines[4].slice(1)]];
+}
 const CUTS = [
   p => p[0] > 51.73883 && p[1] > 5.5057 && p[1] < 5.51256,
   p => p[1] < 5.48853 && p[0] > 51.725,
@@ -849,7 +861,7 @@ function loadStreets() {
   const raw = JSON.parse(document.getElementById("heesch-data").textContent);
   STREETS = Object.entries(raw)
     .filter(([name]) => !REMOVED_STREETS.has(name))
-    .map(([name, lines]) => [name, name === "Ludovicushof" ? [...lines, [[51.73388, 5.52283], [51.733822, 5.522723], [51.733772, 5.522701], [51.733639, 5.522723], [51.733581, 5.522803], [51.733506, 5.522817], [51.73339, 5.522857], [51.73329, 5.522924], [51.733091, 5.523018], [51.732958, 5.523125], [51.73285, 5.523184]]] : lines])
+    .map(([name, lines]) => [name, name === "'t Vijfeiken" ? VIJFEIKEN_LINES : name === "Ruitersweg-Oost" ? connectRuiterswegOost(lines) : name === "Ludovicushof" ? [...lines, [[51.73388, 5.52283], [51.733822, 5.522723], [51.733772, 5.522701], [51.733639, 5.522723], [51.733581, 5.522803], [51.733506, 5.522817], [51.73339, 5.522857], [51.73329, 5.522924], [51.733091, 5.523018], [51.732958, 5.523125], [51.73285, 5.523184]]] : lines])
     .map(([name, lines]) => [name, cutEdges(lines)])
     .map(([name, lines]) => ({ name, lines: lines.filter(line => line.some(p => p[1] <= QUIZ_EAST_LIMIT)), len: totalLen(lines) }))
     .filter(s => s.lines.length)
