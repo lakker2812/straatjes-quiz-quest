@@ -824,13 +824,24 @@ const REMOVED_STREETS = new Set([
   "Nieuwe Hescheweg", "Vorsselweg", "Doorneindstraat", "Tolstraat",
   "Leonardus van Veghelstraat"
 ]);
-const VIJFEIKEN_LINES = [
+// De aangeleverde vorm, teruggeschaald naar de oorspronkelijke ligging en afmetingen.
+const VIJFEIKEN_SOURCE_BOUNDS = { south: 51.7179893, north: 51.7401047, west: 5.505352, east: 5.5523014 };
+const VIJFEIKEN_TARGET_BOUNDS = { south: 51.73236, north: 51.73367, west: 5.52131, east: 5.52717 };
+const VIJFEIKEN_SOURCE_LINES = [
   [[51.7296331,5.505352],[51.7304305,5.5118752],[51.7317595,5.517025],[51.7326632,5.5183983],[51.7354273,5.5312729],[51.7363309,5.5357361],[51.7373409,5.5362511],[51.7388822,5.5425167],[51.7387228,5.5465508],[51.7401047,5.5523014]],
   [[51.7317595,5.517025],[51.7306432,5.51754],[51.7308027,5.512991],[51.7324506,5.5126476],[51.7354273,5.511446],[51.7355336,5.510416],[51.7347895,5.5099869],[51.7329822,5.5103302],[51.7311748,5.5116177],[51.7302711,5.5126476],[51.7306432,5.51754]],
   [[51.7302711,5.5126476],[51.7292078,5.512991],[51.7289952,5.5151367],[51.7293673,5.5171967],[51.7299521,5.5177116]],
   [[51.7317595,5.517025],[51.7306432,5.51754],[51.7289952,5.5178833],[51.7268687,5.5186558],[51.7225621,5.5214024],[51.7179893,5.523634]],
   [[51.7225621,5.5214024],[51.723147,5.5263805]]
 ];
+const VIJFEIKEN_LINES = VIJFEIKEN_SOURCE_LINES.map(line => line.map(([lat, lng]) => {
+  const y = (lat - VIJFEIKEN_SOURCE_BOUNDS.south) / (VIJFEIKEN_SOURCE_BOUNDS.north - VIJFEIKEN_SOURCE_BOUNDS.south);
+  const x = (lng - VIJFEIKEN_SOURCE_BOUNDS.west) / (VIJFEIKEN_SOURCE_BOUNDS.east - VIJFEIKEN_SOURCE_BOUNDS.west);
+  return [
+    VIJFEIKEN_TARGET_BOUNDS.south + y * (VIJFEIKEN_TARGET_BOUNDS.north - VIJFEIKEN_TARGET_BOUNDS.south),
+    VIJFEIKEN_TARGET_BOUNDS.west + x * (VIJFEIKEN_TARGET_BOUNDS.east - VIJFEIKEN_TARGET_BOUNDS.west)
+  ];
+}));
 function connectRuiterswegOost(lines) {
   const westToCenter = [...lines[3], ...lines[0].slice(1), ...lines[1].slice(1), ...lines[2].slice(1)];
   return [[...westToCenter, lines[4][0], ...lines[4].slice(1)]];
